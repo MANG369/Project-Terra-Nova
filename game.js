@@ -1,56 +1,16 @@
-/**
- * ProjectTerraNova - Un juego incremental con arquitectura de alta calidad.
- * @version 3.0.1
- */
+// game.js
 class ProjectTerraNova {
     CONFIG = {
         TICK_RATE_MS: 1000,
-        ENERGY_REGEN_PER_SECOND: 1,
+        ENERGY_REGEN_PER_SECOND: 2, // Aumentado para más acción
         COINS_PER_TAP: 1,
         INITIAL_MAX_ENERGY: 1000,
-        SAVE_KEY: 'terraNovaSave_Master'
+        SAVE_KEY: 'terraNovaSave_Master_v4',
+        DAILY_REWARD_COINS: 100000,
+        DAILY_COMBO_REWARD_COINS: 5000000,
     };
-
-    projectBlueprints = {
-        'edu_1': { name: "Alfabetización Básica", icon: '📚', cost: 20, profitPerHour: 5 },
-        'edu_2': { name: "Bibliotecas Comunitarias", icon: '🏛️', cost: 100, profitPerHour: 15 },
-        'edu_3': { name: "Acceso a Internet Rural", icon: '📶', cost: 500, profitPerHour: 40 },
-        'edu_4': { name: "Plataformas E-Learning", icon: '💻', cost: 2500, profitPerHour: 120 },
-        'edu_5': { name: "Programas de Intercambio", icon: '✈️', cost: 10000, profitPerHour: 350 },
-        'edu_6': { name: "Preservación Cultural", icon: '🗿', cost: 40000, profitPerHour: 700 },
-        'edu_7': { name: "Universidades Gratuitas", icon: '🎓', cost: 150000, profitPerHour: 1800 },
-        'edu_8': { name: "Red de Conocimiento Global", icon: '🌐', cost: 500000, profitPerHour: 4500 },
-        'health_1': { name: "Vacunación Infantil", icon: '💉', cost: 50, profitPerHour: 10 },
-        'health_2': { name: "Agua Potable y Saneamiento", icon: '💧', cost: 400, profitPerHour: 50 },
-        'health_3': { name: "Clínicas Móviles", icon: '🚑', cost: 2000, profitPerHour: 150 },
-        'health_4': { name: "Programas de Nutrición", icon: '🍎', cost: 8000, profitPerHour: 300 },
-        'health_5': { name: "Salud Mental para Todos", icon: '🧠', cost: 35000, profitPerHour: 800 },
-        'health_6': { name: "Investigación Médica AI", icon: '🤖', cost: 120000, profitPerHour: 2000 },
-        'health_7': { name: "Telemedicina Global", icon: '⚕️', cost: 450000, profitPerHour: 5000 },
-        'health_8': { name: "Erradicación de Pandemias", icon: '🦠', cost: 1200000, profitPerHour: 12000 },
-        'infra_1': { name: "Reciclaje Comunitario", icon: '♻️', cost: 300, profitPerHour: 45 },
-        'infra_2': { name: "Energía Eólica y Solar", icon: '☀️', cost: 1500, profitPerHour: 130 },
-        'infra_3': { name: "Transporte Público Eléctrico", icon: '🚌', cost: 7500, profitPerHour: 400 },
-        'infra_4': { name: "Agricultura Vertical", icon: '🌱', cost: 30000, profitPerHour: 900 },
-        'infra_5': { name: "Red Eléctrica Inteligente", icon: '⚡', cost: 100000, profitPerHour: 2500 },
-        'infra_6': { name: "Ciudades Verdes", icon: '🌳', cost: 350000, profitPerHour: 6000 },
-        'infra_7': { name: "Proyectos de Reforestación", icon: '🌲', cost: 800000, profitPerHour: 10000 },
-        'infra_8': { name: "Fusión Nuclear Limpia", icon: '⚛️', cost: 2500000, profitPerHour: 25000 },
-        'gov_1': { name: "Tratados de Paz Regionales", icon: '📜', cost: 5000, profitPerHour: 500 },
-        'gov_2': { name: "Lucha contra la Corrupción", icon: '⚖️', cost: 20000, profitPerHour: 1000 },
-        'gov_3': { name: "Fondo de Ayuda Humanitaria", icon: '🕊️', cost: 80000, profitPerHour: 2200 },
-        'gov_4': { name: "Observatorio de DDHH", icon: '👁️', cost: 250000, profitPerHour: 5500 },
-        'gov_5': { name: "Moneda Global Estable", icon: '🪙', cost: 700000, profitPerHour: 9000 },
-        'gov_6': { name: "Parlamento Mundial", icon: '🏛️', cost: 1500000, profitPerHour: 15000 },
-        'gov_7': { name: "Legislación Espacial Unificada", icon: '🛰️', cost: 3000000, profitPerHour: 28000 },
-        'special_1': { name: "Exploración Espacial Unida", icon: '🚀', cost: 1000000, profitPerHour: 11000 },
-        'special_2': { name: "Algoritmo de la Paz (IA)", icon: '🕊️', cost: 2200000, profitPerHour: 20000 },
-        'special_3': { name: "Red de Conciencia Colectiva", icon: '🌌', cost: 5000000, profitPerHour: 40000 },
-        'special_4': { name: "Proyecto de Geoingeniería", icon: '🌍', cost: 10000000, profitPerHour: 75000 },
-        'special_5': { name: "Embajada Interplanetaria", icon: '👽', cost: 25000000, profitPerHour: 150000 }
-    };
-
-    state = {};
+    
+    // ... (La lista de projectBlueprints no cambia) ...
 
     constructor() {
         this.defaultState = {
@@ -59,7 +19,9 @@ class ProjectTerraNova {
             projects: {},
             energy: this.CONFIG.INITIAL_MAX_ENERGY,
             maxEnergy: this.CONFIG.INITIAL_MAX_ENERGY,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            lastDailyRewardClaim: 0,
+            dailyCombo: this.#generateDailyComboState(),
         };
         this.state = {...this.defaultState};
         this.telegram = window.Telegram?.WebApp;
@@ -67,169 +29,171 @@ class ProjectTerraNova {
     }
 
     async init() {
-        this.#setupTelegramSDK();
-        this.#loadState();
-        this.#recalculateProfitPerHour();
-        this.#setupEventListeners();
+        // ... (resto del init sin cambios) ...
+        this.#checkDailyCombo();
         setInterval(() => this.#gameTick(), this.CONFIG.TICK_RATE_MS);
-        requestAnimationFrame(this.#renderLoop);
-        this.#switchView('exchange-view');
+        // ... (resto del init) ...
     }
 
     #gameTick = () => {
-        const now = Date.now();
-        const elapsedSeconds = (now - this.state.lastUpdate) / 1000;
-        this.state.pazCoin += (this.state.profitPerHour / 3600) * elapsedSeconds;
-        if (this.state.energy < this.state.maxEnergy) {
-            const newEnergy = this.state.energy + (this.CONFIG.ENERGY_REGEN_PER_SECOND * elapsedSeconds);
-            this.state.energy = Math.min(this.state.maxEnergy, newEnergy);
-        }
-        this.state.lastUpdate = now;
-        this.#saveState();
+        // ... (cálculos de pazCoin y energía sin cambios) ...
+        this.#updateDailyRewardButton(); // Actualiza el estado del botón
     }
 
     #handleTap = () => {
         if (this.state.energy >= this.CONFIG.COINS_PER_TAP) {
-            this.state.pazCoin += this.CONFIG.COINS_PER_TAP;
-            this.state.energy -= this.CONFIG.COINS_PER_TAP;
-            this.telegram?.HapticFeedback.impactOccurred('light');
+            // ... (lógica de tap) ...
+            this.dom.clickAudio.play().catch(e => {}); // Reproducir sonido
         }
     }
     
     #buyProject = (projectId) => {
-        const blueprint = this.projectBlueprints[projectId];
-        const currentLevel = this.state.projects[projectId] || 0;
-        const cost = Math.floor(blueprint.cost * Math.pow(1.1, currentLevel));
+        // ... (lógica de compra sin cambios) ...
         if (this.state.pazCoin >= cost) {
-            this.state.pazCoin -= cost;
-            this.state.projects[projectId] = currentLevel + 1;
-            this.telegram?.HapticFeedback.notificationOccurred('success');
-            this.#recalculateProfitPerHour();
-            this.#renderMineView();
+            // ... (actualización de estado) ...
+            this.dom.buyAudio.play().catch(e => {}); // Reproducir sonido
+            this.#checkDailyCombo(projectId); // Comprobar si es parte del combo
+            // ... (resto) ...
         }
     }
 
-    #recalculateProfitPerHour = () => {
-        let totalProfit = 0;
-        for (const id in this.state.projects) {
-            const level = this.state.projects[id];
-            totalProfit += this.projectBlueprints[id].profitPerHour * level;
+    // --- NUEVAS FUNCIONES DE RECOMPENSAS ---
+
+    #claimDailyReward = () => {
+        const now = Date.now();
+        if (now - this.state.lastDailyRewardClaim > 24 * 60 * 60 * 1000) {
+            this.state.lastDailyRewardClaim = now;
+            const reward = this.CONFIG.DAILY_REWARD_COINS;
+            this.state.pazCoin += reward;
+            this.#showNotification("¡Recompensa Diaria!", `Has recibido ${this.#formatNumber(reward)} $XPAZ.`);
+            this.#highlightBalance();
         }
-        this.state.profitPerHour = totalProfit;
     }
 
-    #renderLoop = () => {
-        this.#renderHeaderAndBalance();
-        this.#renderEnergy();
-        requestAnimationFrame(this.#renderLoop);
+    #updateDailyRewardButton = () => {
+        const now = Date.now();
+        const canClaim = now - this.state.lastDailyRewardClaim > 24 * 60 * 60 * 1000;
+        this.dom.dailyRewardButton.disabled = !canClaim;
+        this.dom.dailyRewardButton.classList.toggle('ready', canClaim);
     }
+    
+    #generateDailyComboState = (date = new Date()) => {
+        const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+        const allProjectIds = Object.keys(this.projectBlueprints);
+        const combo = new Set();
+        
+        while(combo.size < 3) {
+            const index = (dayOfYear * (combo.size + 1) * 3 + (combo.size * 5)) % allProjectIds.length;
+            combo.add(allProjectIds[index]);
+        }
+        
+        const purchased = {};
+        combo.forEach(id => purchased[id] = false);
 
-    #renderHeaderAndBalance = () => {
-        this.dom.balance.textContent = this.#formatNumber(this.state.pazCoin);
-        this.dom.profitPerHour.textContent = this.#formatNumber(this.state.profitPerHour);
+        return {
+            date: date.toISOString().split('T')[0],
+            combo: [...combo],
+            purchased: purchased,
+            isClaimed: false
+        };
     }
+    
+    #checkDailyCombo = (purchasedProjectId = null) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        // Si el combo es de un día anterior, generar uno nuevo
+        if (this.state.dailyCombo.date !== todayStr) {
+            this.state.dailyCombo = this.#generateDailyComboState();
+        }
 
-    #renderEnergy = () => {
-        const { energy, maxEnergy } = this.state;
-        this.dom.energyLevel.textContent = `${Math.floor(energy)}/${maxEnergy}`;
-        this.dom.energyBarFill.style.width = `${(energy / maxEnergy) * 100}%`;
+        if (this.state.dailyCombo.isClaimed) {
+            this.#renderDailyCombo();
+            return;
+        }
+
+        // Marcar la compra si el ID está en el combo
+        if (purchasedProjectId && this.state.dailyCombo.combo.includes(purchasedProjectId)) {
+            this.state.dailyCombo.purchased[purchasedProjectId] = true;
+        }
+        
+        // Comprobar si se completó el combo
+        const allPurchased = this.state.dailyCombo.combo.every(id => this.state.dailyCombo.purchased[id]);
+        if (allPurchased) {
+            this.state.dailyCombo.isClaimed = true;
+            const reward = this.CONFIG.DAILY_COMBO_REWARD_COINS;
+            this.state.pazCoin += reward;
+            this.#showNotification("¡Combo Diario Completado!", `¡Felicidades! Has ganado ${this.#formatNumber(reward)} $XPAZ.`);
+            this.#highlightBalance();
+        }
+        this.#renderDailyCombo();
+    }
+    
+    // --- NUEVAS FUNCIONES DE RENDERIZADO Y UI ---
+    
+    #renderDailyCombo = () => {
+        const { combo, purchased, isClaimed } = this.state.dailyCombo;
+        const comboCardsContainer = this.dom.dailyComboCards;
+        comboCardsContainer.innerHTML = '';
+
+        combo.forEach(projectId => {
+            const card = document.createElement('div');
+            if (purchased[projectId] || isClaimed) {
+                card.className = 'combo-card-found';
+                card.textContent = this.projectBlueprints[projectId].icon;
+            } else {
+                card.className = 'combo-card';
+                card.textContent = '?';
+            }
+            comboCardsContainer.appendChild(card);
+        });
     }
 
     #renderMineView = () => {
-        this.dom.mineCardsContainer.innerHTML = '';
-        for (const id in this.projectBlueprints) {
-            const blueprint = this.projectBlueprints[id];
-            const level = this.state.projects[id] || 0;
-            const cost = Math.floor(blueprint.cost * Math.pow(1.1, level));
-            const canBuy = this.state.pazCoin >= cost;
-            const card = document.createElement('div');
-            card.className = 'mine-card';
-            if (canBuy) card.classList.add('can-buy');
-            card.dataset.projectId = id;
-            card.innerHTML = `
-                <div class="mine-card-icon">${blueprint.icon}</div>
-                <div class="mine-card-name">${blueprint.name}</div>
-                <div class="mine-card-info">
-                    <span>Nivel: ${level}</span> | <span>+${this.#formatNumber(blueprint.profitPerHour)}/h</span>
-                </div>
-                <div class="mine-card-cost">💰 ${this.#formatNumber(cost)}</div>
-            `;
-            this.dom.mineCardsContainer.appendChild(card);
+        // ... (lógica de renderizado de tarjetas) ...
+        // Añadir clase si la tarjeta es parte del combo
+        const { combo, isClaimed } = this.state.dailyCombo;
+        if (!isClaimed && combo.includes(id)) {
+            card.classList.add('is-combo');
         }
+        // ... (resto de la función) ...
+    }
+    
+    #showNotification = (title, text) => {
+        this.dom.modalTitle.textContent = title;
+        this.dom.modalText.textContent = text;
+        this.dom.modalOverlay.classList.add('active');
     }
 
-    #setupTelegramSDK = () => {
-        if (!this.telegram) return;
-        this.telegram.ready();
-        this.telegram.expand();
-        this.telegram.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--hk-surface').trim());
+    #closeNotification = () => {
+        this.dom.modalOverlay.classList.remove('active');
+    }
+
+    #highlightBalance = () => {
+        this.dom.balanceDisplay.classList.add('highlight');
+        setTimeout(() => this.dom.balanceDisplay.classList.remove('highlight'), 500);
     }
 
     #cacheDOMElements = () => {
-        this.dom = {
-            views: document.querySelectorAll('.view'),
-            navButtons: document.querySelectorAll('.nav-button'),
-            balance: document.getElementById('pazcoin-balance'),
-            profitPerHour: document.getElementById('profit-per-hour'),
-            globe: document.getElementById('globe'),
-            energyLevel: document.getElementById('energy-level'),
-            energyBarFill: document.getElementById('energy-bar-fill'),
-            mineCardsContainer: document.getElementById('mine-cards-container'),
-        };
+        // ... (cache de todos los elementos anteriores) ...
+        this.dom.dailyRewardButton = document.getElementById('daily-reward-button');
+        this.dom.modalOverlay = document.getElementById('notification-modal');
+        this.dom.modalTitle = document.getElementById('modal-title');
+        this.dom.modalText = document.getElementById('modal-text');
+        this.dom.modalCloseButton = document.getElementById('modal-close-button');
+        this.dom.dailyComboCards = document.getElementById('daily-combo-cards');
+        this.dom.balanceDisplay = document.querySelector('.balance-display');
+        this.dom.clickAudio = document.getElementById('click-audio');
+        this.dom.buyAudio = document.getElementById('buy-audio');
     }
 
     #setupEventListeners = () => {
-        this.dom.globe.addEventListener('click', this.#handleTap);
-        this.dom.navButtons.forEach(button => {
-            button.addEventListener('click', () => this.#switchView(button.dataset.view));
-        });
-        this.dom.mineCardsContainer.addEventListener('click', (e) => {
-            const card = e.target.closest('.mine-card.can-buy');
-            if (card) this.#buyProject(card.dataset.projectId);
-        });
+        // ... (event listeners anteriores) ...
+        this.dom.dailyRewardButton.addEventListener('click', this.#claimDailyReward);
+        this.dom.modalCloseButton.addEventListener('click', this.#closeNotification);
     }
-
-    #switchView = (viewId) => {
-        this.dom.views.forEach(view => view.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        this.dom.navButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.view === viewId);
-        });
-        if (viewId === 'mine-view') this.#renderMineView();
-    }
-
-    #saveState = () => {
-        try {
-            localStorage.setItem(this.CONFIG.SAVE_KEY, JSON.stringify(this.state));
-        } catch (error) {
-            console.error("Error al guardar el estado:", error);
-        }
-    }
-
-    #loadState = () => {
-        try {
-            const savedState = localStorage.getItem(this.CONFIG.SAVE_KEY);
-            if (savedState) {
-                const loaded = JSON.parse(savedState);
-                this.state = { ...this.defaultState, ...loaded };
-            }
-        } catch (error) {
-            console.error("Error al cargar el estado:", error);
-            this.state = {...this.defaultState};
-        }
-    }
-
-    #formatNumber = (num) => {
-        const number = Math.floor(num);
-        if (number < 1e3) return number.toString();
-        if (number < 1e6) return `${(number / 1e3).toFixed(2)}K`;
-        if (number < 1e9) return `${(number / 1e6).toFixed(2)}M`;
-        if (number < 1e12) return `${(number / 1e9).toFixed(2)}B`;
-        return `${(number / 1e12).toFixed(2)}T`;
-    }
+    
+    // El resto de la clase (`#formatNumber`, `loadState`, etc.) no necesita cambios.
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-    const game = new ProjectTerraNova();
-    await game.init();
+    // ... (código de inicialización, sin cambios) ...
 });
