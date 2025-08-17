@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Terra Nova</title>
+
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://telegram.org; object-src 'none'; base-uri 'none';">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Un juego incremental para construir un mundo mejor.">
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d2025">
-    <link rel="apple-touch-icon" href="globe.png"> <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" href="globe.png">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app-container">
@@ -48,7 +53,9 @@
     
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration Failed:', err));
+        });
       }
     </script>
 </body>

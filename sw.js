@@ -1,4 +1,4 @@
-const CACHE_NAME = 'terra-nova-cache-v3'; // Incrementa la versión si haces cambios
+const CACHE_NAME = 'terra-nova-cache-v1';
 const urlsToCache = [ '/', '/index.html', '/style.css', '/game.js', '/globe.png' ];
 
 self.addEventListener('install', e => e.waitUntil(

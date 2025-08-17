@@ -144,7 +144,6 @@ body {
 }
 .nav-button.active { background-color: #3a3e45; color: var(--hk-text); }
 
-/* --- Mejoras para Escritorio y Tabletas --- */
 @media (min-width: 768px) {
     body { display: flex; align-items: center; justify-content: center; }
     #app-container {
