@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Terra Nova</title>
     <link rel="stylesheet" href="style.css">
@@ -17,14 +18,14 @@
 
         <main>
             <div id="clicker-section">
+                <p class="income-display"><span id="pazcoin-per-second">0.00</span> $XPAZ por segundo</p>
+
                 <div id="globe-container">
-                    <div id="globe">🌍</div>
+                    <img src="globe.png" id="globe" alt="Planeta Tierra Clickeable">
                     <div id="click-feedback">+1</div>
                 </div>
-                <div id="stats-section">
-                    <h2><span id="pazcoin-balance">0</span> $XPAZ</h2>
-                    <p><span id="pazcoin-per-second">0.00</span> $XPAZ por segundo</p>
-                </div>
+
+                <h2 class="balance-display"><span id="pazcoin-balance">0</span> $XPAZ</h2>
             </div>
 
             <div id="projects-section">
