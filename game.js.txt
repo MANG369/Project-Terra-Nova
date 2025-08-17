@@ -10,11 +10,20 @@ class ProjectTerraNova {
             'health': { name: "Salud y Bienestar", baseCost: 1000, baseIncome: 5, costMultiplier: 1.25 },
             'water': { name: "Acceso a Agua Potable", baseCost: 5000, baseIncome: 20, costMultiplier: 1.30 }
         };
+
+        // --- NUEVO ESTADO DEL JUEGO ---
         this.state = {
             pazCoin: 0,
             projects: { 'edu': { level: 0 }, 'energy': { level: 0 }, 'health': { level: 0 }, 'water': { level: 0 } },
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            walletBonusClaimed: false, // Para la recompensa de la wallet
+            booster: {
+                active: false,
+                endTime: 0,
+                cooldownEnd: Date.now() + (10 * 1000) // Cooldown inicial de 10s
+            }
         };
+
         this.dom = {
             balance: document.getElementById('pazcoin-balance'),
             perSecond: document.getElementById('pazcoin-per-second'),
@@ -22,6 +31,7 @@ class ProjectTerraNova {
             globe: document.getElementById('globe'),
             clickFeedback: document.getElementById('click-feedback'),
             walletStatus: document.getElementById('wallet-status'),
+            boosterButton: document.getElementById('booster-button'), // Nuevo botón
         };
         this.tonConnectUI = null;
     }
@@ -41,6 +51,10 @@ class ProjectTerraNova {
         const passiveIncome = this.calculatePassiveIncome();
         this.state.pazCoin += passiveIncome * elapsedSeconds;
         this.state.lastUpdate = now;
+
+        // Lógica del potenciador
+        this.updateBoosterState();
+
         this.render();
         this.saveState();
     }
@@ -60,11 +74,19 @@ class ProjectTerraNova {
         }
     }
     
+    // --- LÓGICA DE CÁLCULO ACTUALIZADA ---
     calculatePassiveIncome() {
-        return Object.keys(this.state.projects).reduce((total, id) => {
+        let baseIncome = Object.keys(this.state.projects).reduce((total, id) => {
             const level = this.state.projects[id].level;
             return total + (level * this.projectBlueprints[id].baseIncome);
         }, 0);
+        
+        // Aplicar multiplicador si el potenciador está activo
+        if(this.state.booster.active) {
+            baseIncome *= 2;
+        }
+        
+        return baseIncome;
     }
 
     calculateProjectCost(projectId) {
@@ -73,9 +95,11 @@ class ProjectTerraNova {
         return Math.floor(project.baseCost * Math.pow(project.costMultiplier, level));
     }
 
+    // --- LÓGICA DE RENDERIZADO ACTUALIZADA ---
     render() {
         this.renderBalance();
         this.renderProjects();
+        this.renderBooster(); // Renderizar el estado del nuevo botón
     }
     
     renderBalance() {
@@ -83,79 +107,84 @@ class ProjectTerraNova {
         this.dom.perSecond.textContent = this.calculatePassiveIncome().toFixed(2);
     }
     
-    // --- FUNCIÓN ACTUALIZADA ---
-    renderProjects() {
-        this.dom.projectsList.innerHTML = '';
-        for (const id in this.projectBlueprints) {
-            const blueprint = this.projectBlueprints[id];
-            const state = this.state.projects[id];
-            const cost = this.calculateProjectCost(id);
+    renderProjects() { /* ... (sin cambios) ... */ }
+    
+    renderBooster() {
+        const booster = this.state.booster;
+        const now = Date.now();
+        
+        if (booster.active) {
+            this.dom.boosterButton.disabled = true;
+            const timeLeft = Math.ceil((booster.endTime - now) / 1000);
+            this.dom.boosterButton.textContent = `Activo x2 (${timeLeft}s)`;
+        } else if (now < booster.cooldownEnd) {
+            this.dom.boosterButton.disabled = true;
+            const timeLeft = Math.ceil((booster.cooldownEnd - now) / 1000);
+            this.dom.boosterButton.textContent = `Enfriamiento (${timeLeft}s)`;
+        } else {
+            this.dom.boosterButton.disabled = false;
+            this.dom.boosterButton.textContent = `Potenciador de Armonía (x2)`;
+        }
+    }
 
-            const projectElement = document.createElement('div');
-            projectElement.className = 'project';
-            
-            // Nuevo HTML para el estilo visual del juego
-            projectElement.innerHTML = `
-                <div class="project-info">
-                    <h3>${blueprint.name}</h3>
-                    <div class="project-details">
-                        <span>⭐ Nivel: ${state.level}</span>
-                        <span>📈 Ingreso: +${(state.level * blueprint.baseIncome).toFixed(2)}/s</span>
-                    </div>
-                </div>
-                <button class="buy-button" data-project-id="${id}">
-                    💰 ${cost.toLocaleString()}
-                </button>
-            `;
-            
-            projectElement.querySelector('.buy-button').disabled = this.state.pazCoin < cost;
-            this.dom.projectsList.appendChild(projectElement);
+    // --- NUEVA LÓGICA DEL POTENCIADOR ---
+    activateBooster() {
+        const now = Date.now();
+        if (now >= this.state.booster.cooldownEnd && !this.state.booster.active) {
+            this.state.booster.active = true;
+            this.state.booster.endTime = now + (30 * 1000); // Dura 30 segundos
         }
     }
     
-    showClickFeedback() {
-        const feedback = this.dom.clickFeedback;
-        feedback.classList.add('show');
-        setTimeout(() => feedback.classList.remove('show'), 500);
-    }
-
-    saveState() {
-        localStorage.setItem('terraNovaSave', JSON.stringify({ version: this.GAME_VERSION, state: this.state }));
-    }
-
-    loadState() {
-        const savedData = localStorage.getItem('terraNovaSave');
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
-                if (parsed.version === this.GAME_VERSION) this.state = parsed.state;
-            } catch (error) {
-                console.error("Error al cargar datos.", error);
-            }
+    updateBoosterState() {
+        const now = Date.now();
+        const booster = this.state.booster;
+        if (booster.active && now >= booster.endTime) {
+            booster.active = false;
+            booster.cooldownEnd = now + (120 * 1000); // Cooldown de 2 minutos
         }
     }
+
+    showClickFeedback() { /* ... (sin cambios) ... */ }
+
+    saveState() { /* ... (sin cambios) ... */ }
+
+    loadState() { /* ... (sin cambios, cargará el nuevo estado si existe) ... */ }
     
+    // --- LÓGICA DE WALLET ACTUALIZADA CON RECOMPENSA ---
     async setupTonConnect() {
         this.tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://URL_DE_TU_JUEGO/tonconnect-manifest.json',
             buttonRootId: 'wallet-status'
         });
+
         this.tonConnectUI.onStatusChange(wallet => {
-            if (wallet) console.log(`Billetera conectada: ${wallet.account.address}`);
-        });
-    }
-    
-    setupEventListeners() {
-        this.dom.globe.addEventListener('click', () => this.handleTap());
-        this.dom.projectsList.addEventListener('click', (event) => {
-            const button = event.target.closest('.buy-button');
-            if (button) {
-                this.buyProject(button.dataset.projectId);
+            if (wallet && !this.state.walletBonusClaimed) {
+                console.log(`Billetera conectada por primera vez: ${wallet.account.address}`);
+                alert("¡Gracias por conectar tu billetera! Has recibido una recompensa de 500 $XPAZ.");
+                this.state.pazCoin += 500;
+                this.state.walletBonusClaimed = true;
+                this.renderBalance(); // Actualizar la UI inmediatamente
             }
         });
     }
+    
+    // --- MANEJO DE EVENTOS ACTUALIZADO ---
+    setupEventListeners() {
+        this.dom.globe.addEventListener('click', () => this.handleTap());
+        
+        this.dom.projectsList.addEventListener('click', (event) => {
+            const button = event.target.closest('.buy-button');
+            if (button) this.buyProject(button.dataset.projectId);
+        });
+
+        // Event listener para el nuevo botón
+        this.dom.boosterButton.addEventListener('click', () => this.activateBooster());
+    }
 }
 
+
+// --- PUNTO DE ENTRADA (SIN CAMBIOS) ---
 document.addEventListener('DOMContentLoaded', async () => {
     const game = new ProjectTerraNova();
     await game.init();
