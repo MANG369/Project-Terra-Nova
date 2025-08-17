@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Terra Nova</title>
-
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://telegram.org;
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data:;
-        object-src 'none';
-        base-uri 'none';
-    ">
+    
+    <base href="/Project-Terra-Nova/">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Un juego incremental para construir un mundo mejor.">
-
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d2025">
     <link rel="apple-touch-icon" href="globe.png">
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,7 +22,9 @@
                 <span>Beneficio por Hora</span>
                 <strong id="profit-per-hour">0</strong>
             </div>
+            <button id="daily-reward-button" class="header-button">🎁</button>
         </header>
+
         <main id="main-content">
             <div id="exchange-view" class="view">
                 <div class="balance-display"><span id="pazcoin-balance">0</span></div>
@@ -44,23 +38,34 @@
                 </div>
             </div>
             <div id="mine-view" class="view">
+                <div class="daily-combo-section">
+                    <h3>Combo Diario</h3>
+                    <div id="daily-combo-cards" class="daily-combo-cards">
+                        <div class="combo-card">?</div> <div class="combo-card">?</div> <div class="combo-card">?</div>
+                    </div>
+                </div>
                 <div id="mine-cards-container"></div>
             </div>
         </main>
+
         <nav class="bottom-nav">
             <button class="nav-button" data-view="exchange-view">🌍 Principal</button>
             <button class="nav-button" data-view="mine-view">🚀 Mejoras</button>
         </nav>
     </div>
 
-    <script type="module" src="game.js"></script>
+    <div id="notification-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">Título</h2>
+            <p id="modal-text">Texto de la notificación.</p>
+            <button id="modal-close-button">Cerrar</button>
+        </div>
+    </div>
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration Failed:', err));
-        });
-      }
-    </script>
+    <audio id="click-audio" src="click-sound.mp3" preload="auto"></audio>
+    <audio id="buy-audio" src="buy-sound.mp3" preload="auto"></audio>
+
+    <script type="module" src="game.js"></script>
+    <script src="register-sw.js" defer></script>
 </body>
 </html>

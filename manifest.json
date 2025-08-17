@@ -1,7 +1,8 @@
 {
   "name": "Project Terra Nova",
   "short_name": "Terra Nova",
-  "start_url": ".",
+  "start_url": "/Project-Terra-Nova/",
+  "scope": "/Project-Terra-Nova/",
   "display": "standalone",
   "background_color": "#1d2025",
   "theme_color": "#1d2025",
