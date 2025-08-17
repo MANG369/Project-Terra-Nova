@@ -2,48 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com;">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Terra Nova</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Un juego incremental para construir un mundo mejor.">
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1d2025">
+    <link rel="apple-touch-icon" href="globe.png"> <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <header>
-            <h1>Project Terra Nova</h1>
-            <div id="wallet-status">
-                </div>
+    <div id="app-container">
+        <header class="main-header">
+            <div class="header-stat">
+                <span>Beneficio por Hora</span>
+                <strong id="profit-per-hour">0</strong>
+            </div>
         </header>
 
-        <main>
-            <div id="clicker-section">
-                <p class="income-display"><span id="pazcoin-per-second">0.00</span> $XPAZ por segundo</p>
-
-                <div id="globe-container">
-                    <img src="globe.png" id="globe" alt="Planeta Tierra Clickeable">
-                    <div id="click-feedback">+1</div>
+        <main id="main-content">
+            <div id="exchange-view" class="view">
+                <div class="balance-display"><span id="pazcoin-balance">0</span></div>
+                <div class="clicker-area">
+                    <img src="globe.png" id="globe" alt="Planeta Tierra interactivo" draggable="false">
                 </div>
-
-                <h2 class="balance-display"><span id="pazcoin-balance">0</span> $XPAZ</h2>
+                <div class="energy-bar-container">
+                    <span>⚡️</span>
+                    <div class="energy-bar"><div id="energy-bar-fill" class="energy-bar-fill"></div></div>
+                    <span id="energy-level">1000/1000</span>
+                </div>
             </div>
-            
-            <div id="booster-section">
-                <button id="booster-button">Potenciador de Armonía</button>
-            </div>
 
-            <div id="projects-section">
-                <h2>Proyectos Globales</h2>
-                <div id="projects-list">
-                    </div>
+            <div id="mine-view" class="view">
+                <div id="mine-cards-container"></div>
             </div>
         </main>
 
-        <footer>
-            <p>Project Terra Nova - Un Juego Incremental de Paz Global</p>
-        </footer>
+        <nav class="bottom-nav">
+            <button class="nav-button" data-view="exchange-view">🌍 Principal</button>
+            <button class="nav-button" data-view="mine-view">🚀 Mejoras</button>
+        </nav>
     </div>
 
     <script type="module" src="game.js"></script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+      }
+    </script>
 </body>
 </html>

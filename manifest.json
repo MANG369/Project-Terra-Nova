@@ -1,0 +1,13 @@
+{
+  "name": "Project Terra Nova",
+  "short_name": "Terra Nova",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1d2025",
+  "theme_color": "#1d2025",
+  "description": "Un juego incremental para construir un mundo mejor.",
+  "icons": [
+    { "src": "globe.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "globe.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

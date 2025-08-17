@@ -1,191 +1,277 @@
 // game.js
 
+/**
+ * ProjectTerraNova - Un juego incremental con arquitectura de alta calidad.
+ * @author Master AI
+ * @version 3.0.0
+ */
 class ProjectTerraNova {
+    // --- 1. CONFIGURACIÓN Y ESTADO INICIAL ---
+
+    // Configuración centralizada para un fácil balanceo del juego.
+    CONFIG = {
+        TICK_RATE_MS: 1000,
+        ENERGY_REGEN_PER_SECOND: 1,
+        COINS_PER_TAP: 1,
+        INITIAL_MAX_ENERGY: 1000,
+        SAVE_KEY: 'terraNovaSave_Master'
+    };
+
+    // Estructura de datos para todas las mejoras del juego.
+    // Fácilmente extensible.
+    projectBlueprints = {
+        // ... (La lista completa de mejoras va aquí, sin cambios) ...
+        'edu_1': { name: "Alfabetización Básica", icon: '📚', cost: 20, profitPerHour: 5 },
+        'edu_2': { name: "Bibliotecas Comunitarias", icon: '🏛️', cost: 100, profitPerHour: 15 },
+        'edu_3': { name: "Acceso a Internet Rural", icon: '📶', cost: 500, profitPerHour: 40 },
+        'edu_4': { name: "Plataformas E-Learning", icon: '💻', cost: 2500, profitPerHour: 120 },
+        'edu_5': { name: "Programas de Intercambio", icon: '✈️', cost: 10000, profitPerHour: 350 },
+        'edu_6': { name: "Preservación Cultural", icon: '🗿', cost: 40000, profitPerHour: 700 },
+        'edu_7': { name: "Universidades Gratuitas", icon: '🎓', cost: 150000, profitPerHour: 1800 },
+        'edu_8': { name: "Red de Conocimiento Global", icon: '🌐', cost: 500000, profitPerHour: 4500 },
+        'health_1': { name: "Vacunación Infantil", icon: '💉', cost: 50, profitPerHour: 10 },
+        'health_2': { name: "Agua Potable y Saneamiento", icon: '💧', cost: 400, profitPerHour: 50 },
+        'health_3': { name: "Clínicas Móviles", icon: '🚑', cost: 2000, profitPerHour: 150 },
+        'health_4': { name: "Programas de Nutrición", icon: '🍎', cost: 8000, profitPerHour: 300 },
+        'health_5': { name: "Salud Mental para Todos", icon: '🧠', cost: 35000, profitPerHour: 800 },
+        'health_6': { name: "Investigación Médica AI", icon: '🤖', cost: 120000, profitPerHour: 2000 },
+        'health_7': { name: "Telemedicina Global", icon: '⚕️', cost: 450000, profitPerHour: 5000 },
+        'health_8': { name: "Erradicación de Pandemias", icon: '🦠', cost: 1200000, profitPerHour: 12000 },
+        'infra_1': { name: "Reciclaje Comunitario", icon: '♻️', cost: 300, profitPerHour: 45 },
+        'infra_2': { name: "Energía Eólica y Solar", icon: '☀️', cost: 1500, profitPerHour: 130 },
+        'infra_3': { name: "Transporte Público Eléctrico", icon: '🚌', cost: 7500, profitPerHour: 400 },
+        'infra_4': { name: "Agricultura Vertical", icon: '🌱', cost: 30000, profitPerHour: 900 },
+        'infra_5': { name: "Red Eléctrica Inteligente", icon: '⚡', cost: 100000, profitPerHour: 2500 },
+        'infra_6': { name: "Ciudades Verdes", icon: '🌳', cost: 350000, profitPerHour: 6000 },
+        'infra_7': { name: "Proyectos de Reforestación", icon: '🌲', cost: 800000, profitPerHour: 10000 },
+        'infra_8': { name: "Fusión Nuclear Limpia", icon: '⚛️', cost: 2500000, profitPerHour: 25000 },
+        'gov_1': { name: "Tratados de Paz Regionales", icon: '📜', cost: 5000, profitPerHour: 500 },
+        'gov_2': { name: "Lucha contra la Corrupción", icon: '⚖️', cost: 20000, profitPerHour: 1000 },
+        'gov_3': { name: "Fondo de Ayuda Humanitaria", icon: '🕊️', cost: 80000, profitPerHour: 2200 },
+        'gov_4': { name: "Observatorio de DDHH", icon: '👁️', cost: 250000, profitPerHour: 5500 },
+        'gov_5': { name: "Moneda Global Estable", icon: '🪙', cost: 700000, profitPerHour: 9000 },
+        'gov_6': { name: "Parlamento Mundial", icon: '🏛️', cost: 1500000, profitPerHour: 15000 },
+        'gov_7': { name: "Legislación Espacial Unificada", icon: '🛰️', cost: 3000000, profitPerHour: 28000 },
+        'special_1': { name: "Exploración Espacial Unida", icon: '🚀', cost: 1000000, profitPerHour: 11000 },
+        'special_2': { name: "Algoritmo de la Paz (IA)", icon: '🕊️', cost: 2200000, profitPerHour: 20000 },
+        'special_3': { name: "Red de Conciencia Colectiva", icon: '🌌', cost: 5000000, profitPerHour: 40000 },
+        'special_4': { name: "Proyecto de Geoingeniería", icon: '🌍', cost: 10000000, profitPerHour: 75000 },
+        'special_5': { name: "Embajada Interplanetaria", icon: '👽', cost: 25000000, profitPerHour: 150000 }
+    };
+
+    // El estado del juego que será guardado y cargado.
+    state = {};
+
     constructor() {
-        this.GAME_VERSION = "1.0.0";
-        this.TICK_RATE = 1000;
-        this.projectBlueprints = {
-            'edu': { name: "Educación Universal", baseCost: 10, baseIncome: 0.1, costMultiplier: 1.15 },
-            'energy': { name: "Energía Limpia Global", baseCost: 150, baseIncome: 1, costMultiplier: 1.20 },
-            'health': { name: "Salud y Bienestar", baseCost: 1000, baseIncome: 5, costMultiplier: 1.25 },
-            'water': { name: "Acceso a Agua Potable", baseCost: 5000, baseIncome: 20, costMultiplier: 1.30 }
-        };
-
-        // --- NUEVO ESTADO DEL JUEGO ---
-        this.state = {
+        // Estado por defecto para un nuevo juego o para fusionar con datos guardados.
+        this.defaultState = {
             pazCoin: 0,
-            projects: { 'edu': { level: 0 }, 'energy': { level: 0 }, 'health': { level: 0 }, 'water': { level: 0 } },
-            lastUpdate: Date.now(),
-            walletBonusClaimed: false, // Para la recompensa de la wallet
-            booster: {
-                active: false,
-                endTime: 0,
-                cooldownEnd: Date.now() + (10 * 1000) // Cooldown inicial de 10s
-            }
+            profitPerHour: 0,
+            projects: {},
+            energy: this.CONFIG.INITIAL_MAX_ENERGY,
+            maxEnergy: this.CONFIG.INITIAL_MAX_ENERGY,
+            lastUpdate: Date.now()
         };
+        this.state = {...this.defaultState};
 
-        this.dom = {
-            balance: document.getElementById('pazcoin-balance'),
-            perSecond: document.getElementById('pazcoin-per-second'),
-            projectsList: document.getElementById('projects-list'),
-            globe: document.getElementById('globe'),
-            clickFeedback: document.getElementById('click-feedback'),
-            walletStatus: document.getElementById('wallet-status'),
-            boosterButton: document.getElementById('booster-button'), // Nuevo botón
-        };
-        this.tonConnectUI = null;
+        this.telegram = window.Telegram?.WebApp;
+        this.#cacheDOMElements();
     }
+
+    // --- 2. MÉTODOS DE INICIALIZACIÓN ---
 
     async init() {
-        console.log("Iniciando Project Terra Nova...");
-        this.loadState();
-        await this.setupTonConnect();
-        this.setupEventListeners();
-        setInterval(() => this.gameLoop(), this.TICK_RATE);
-        console.log("Juego iniciado y listo.");
+        this.#setupTelegramSDK();
+        this.#loadState();
+        this.#recalculateProfitPerHour();
+        this.#setupEventListeners();
+        
+        // Inicia el bucle de lógica del juego.
+        setInterval(() => this.#gameTick(), this.CONFIG.TICK_RATE_MS);
+        
+        // Inicia el bucle de renderizado, optimizado para animaciones.
+        requestAnimationFrame(this.#renderLoop);
+
+        // Activa la vista inicial
+        this.#switchView('exchange-view');
+        console.log("Project Terra Nova: Master Edition - Inicializado.");
     }
 
-    gameLoop() {
+    // --- 3. BUCLE PRINCIPAL Y LÓGICA DEL JUEGO ---
+
+    // Este bucle se encarga solo de la lógica, no del renderizado.
+    #gameTick = () => {
         const now = Date.now();
         const elapsedSeconds = (now - this.state.lastUpdate) / 1000;
-        const passiveIncome = this.calculatePassiveIncome();
-        this.state.pazCoin += passiveIncome * elapsedSeconds;
+        
+        this.state.pazCoin += (this.state.profitPerHour / 3600) * elapsedSeconds;
+        
+        if (this.state.energy < this.state.maxEnergy) {
+            const newEnergy = this.state.energy + (this.CONFIG.ENERGY_REGEN_PER_SECOND * elapsedSeconds);
+            this.state.energy = Math.min(this.state.maxEnergy, newEnergy);
+        }
+        
         this.state.lastUpdate = now;
-
-        // Lógica del potenciador
-        this.updateBoosterState();
-
-        this.render();
-        this.saveState();
-    }
-    
-    handleTap() {
-        this.state.pazCoin += 1;
-        this.showClickFeedback();
-        this.renderBalance();
+        this.#saveState(); // Guardado periódico
     }
 
-    buyProject(projectId) {
-        const cost = this.calculateProjectCost(projectId);
+    #handleTap = () => {
+        if (this.state.energy >= this.CONFIG.COINS_PER_TAP) {
+            this.state.pazCoin += this.CONFIG.COINS_PER_TAP;
+            this.state.energy -= this.CONFIG.COINS_PER_TAP;
+            this.telegram?.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    #buyProject = (projectId) => {
+        const blueprint = this.projectBlueprints[projectId];
+        const currentLevel = this.state.projects[projectId] || 0;
+        const cost = Math.floor(blueprint.cost * Math.pow(1.1, currentLevel));
+
         if (this.state.pazCoin >= cost) {
             this.state.pazCoin -= cost;
-            this.state.projects[projectId].level++;
-            this.render();
-        }
-    }
-    
-    // --- LÓGICA DE CÁLCULO ACTUALIZADA ---
-    calculatePassiveIncome() {
-        let baseIncome = Object.keys(this.state.projects).reduce((total, id) => {
-            const level = this.state.projects[id].level;
-            return total + (level * this.projectBlueprints[id].baseIncome);
-        }, 0);
-        
-        // Aplicar multiplicador si el potenciador está activo
-        if(this.state.booster.active) {
-            baseIncome *= 2;
-        }
-        
-        return baseIncome;
-    }
-
-    calculateProjectCost(projectId) {
-        const project = this.projectBlueprints[projectId];
-        const level = this.state.projects[projectId].level;
-        return Math.floor(project.baseCost * Math.pow(project.costMultiplier, level));
-    }
-
-    // --- LÓGICA DE RENDERIZADO ACTUALIZADA ---
-    render() {
-        this.renderBalance();
-        this.renderProjects();
-        this.renderBooster(); // Renderizar el estado del nuevo botón
-    }
-    
-    renderBalance() {
-        this.dom.balance.textContent = Math.floor(this.state.pazCoin).toLocaleString();
-        this.dom.perSecond.textContent = this.calculatePassiveIncome().toFixed(2);
-    }
-    
-    renderProjects() { /* ... (sin cambios) ... */ }
-    
-    renderBooster() {
-        const booster = this.state.booster;
-        const now = Date.now();
-        
-        if (booster.active) {
-            this.dom.boosterButton.disabled = true;
-            const timeLeft = Math.ceil((booster.endTime - now) / 1000);
-            this.dom.boosterButton.textContent = `Activo x2 (${timeLeft}s)`;
-        } else if (now < booster.cooldownEnd) {
-            this.dom.boosterButton.disabled = true;
-            const timeLeft = Math.ceil((booster.cooldownEnd - now) / 1000);
-            this.dom.boosterButton.textContent = `Enfriamiento (${timeLeft}s)`;
-        } else {
-            this.dom.boosterButton.disabled = false;
-            this.dom.boosterButton.textContent = `Potenciador de Armonía (x2)`;
+            this.state.projects[projectId] = currentLevel + 1;
+            this.telegram?.HapticFeedback.notificationOccurred('success');
+            this.#recalculateProfitPerHour();
+            this.#renderMineView(); // Re-dibuja solo la vista de mejoras
         }
     }
 
-    // --- NUEVA LÓGICA DEL POTENCIADOR ---
-    activateBooster() {
-        const now = Date.now();
-        if (now >= this.state.booster.cooldownEnd && !this.state.booster.active) {
-            this.state.booster.active = true;
-            this.state.booster.endTime = now + (30 * 1000); // Dura 30 segundos
+    #recalculateProfitPerHour = () => {
+        let totalProfit = 0;
+        for (const id in this.state.projects) {
+            const level = this.state.projects[id];
+            totalProfit += this.projectBlueprints[id].profitPerHour * level;
         }
-    }
-    
-    updateBoosterState() {
-        const now = Date.now();
-        const booster = this.state.booster;
-        if (booster.active && now >= booster.endTime) {
-            booster.active = false;
-            booster.cooldownEnd = now + (120 * 1000); // Cooldown de 2 minutos
-        }
+        this.state.profitPerHour = totalProfit;
     }
 
-    showClickFeedback() { /* ... (sin cambios) ... */ }
+    // --- 4. RENDERIZADO (ACTUALIZACIÓN DE LA UI) ---
 
-    saveState() { /* ... (sin cambios) ... */ }
+    // Bucle de renderizado optimizado que se ejecuta en cada frame.
+    #renderLoop = () => {
+        this.#renderHeaderAndBalance();
+        this.#renderEnergy();
+        requestAnimationFrame(this.#renderLoop);
+    }
 
-    loadState() { /* ... (sin cambios, cargará el nuevo estado si existe) ... */ }
-    
-    // --- LÓGICA DE WALLET ACTUALIZADA CON RECOMPENSA ---
-    async setupTonConnect() {
-        this.tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://URL_DE_TU_JUEGO/tonconnect-manifest.json',
-            buttonRootId: 'wallet-status'
+    #renderHeaderAndBalance = () => {
+        this.dom.balance.textContent = this.#formatNumber(this.state.pazCoin);
+        this.dom.profitPerHour.textContent = this.#formatNumber(this.state.profitPerHour);
+    }
+
+    #renderEnergy = () => {
+        const { energy, maxEnergy } = this.state;
+        this.dom.energyLevel.textContent = `${Math.floor(energy)}/${maxEnergy}`;
+        this.dom.energyBarFill.style.width = `${(energy / maxEnergy) * 100}%`;
+    }
+
+    #renderMineView = () => {
+        this.dom.mineCardsContainer.innerHTML = '';
+        for (const id in this.projectBlueprints) {
+            const blueprint = this.projectBlueprints[id];
+            const level = this.state.projects[id] || 0;
+            const cost = Math.floor(blueprint.cost * Math.pow(1.1, level));
+            const canBuy = this.state.pazCoin >= cost;
+            
+            const card = document.createElement('div');
+            card.className = 'mine-card';
+            if (canBuy) card.classList.add('can-buy');
+            card.dataset.projectId = id;
+
+            card.innerHTML = `
+                <div class="mine-card-icon">${blueprint.icon}</div>
+                <div class="mine-card-name">${blueprint.name}</div>
+                <div class="mine-card-info">
+                    <span>Nivel: ${level}</span> | <span>+${blueprint.profitPerHour}/h</span>
+                </div>
+                <div class="mine-card-cost">💰 ${this.#formatNumber(cost)}</div>
+            `;
+            this.dom.mineCardsContainer.appendChild(card);
+        }
+    }
+
+    // --- 5. MÉTODOS AUXILIARES Y DE CONFIGURACIÓN ---
+
+    #setupTelegramSDK = () => {
+        if (!this.telegram) return;
+        this.telegram.ready();
+        this.telegram.expand();
+        this.telegram.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--hk-surface').trim());
+    }
+
+    #cacheDOMElements = () => {
+        this.dom = {
+            views: document.querySelectorAll('.view'),
+            navButtons: document.querySelectorAll('.nav-button'),
+            balance: document.getElementById('pazcoin-balance'),
+            profitPerHour: document.getElementById('profit-per-hour'),
+            globe: document.getElementById('globe'),
+            energyLevel: document.getElementById('energy-level'),
+            energyBarFill: document.getElementById('energy-bar-fill'),
+            mineCardsContainer: document.getElementById('mine-cards-container'),
+        };
+    }
+
+    #setupEventListeners = () => {
+        this.dom.globe.addEventListener('click', this.#handleTap);
+
+        this.dom.navButtons.forEach(button => {
+            button.addEventListener('click', () => this.#switchView(button.dataset.view));
         });
 
-        this.tonConnectUI.onStatusChange(wallet => {
-            if (wallet && !this.state.walletBonusClaimed) {
-                console.log(`Billetera conectada por primera vez: ${wallet.account.address}`);
-                alert("¡Gracias por conectar tu billetera! Has recibido una recompensa de 500 $XPAZ.");
-                this.state.pazCoin += 500;
-                this.state.walletBonusClaimed = true;
-                this.renderBalance(); // Actualizar la UI inmediatamente
+        this.dom.mineCardsContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.mine-card.can-buy');
+            if (card) this.#buyProject(card.dataset.projectId);
+        });
+    }
+
+    #switchView = (viewId) => {
+        this.dom.views.forEach(view => view.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+
+        this.dom.navButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === viewId);
+        });
+        
+        if (viewId === 'mine-view') this.#renderMineView();
+    }
+
+    #saveState = () => {
+        try {
+            localStorage.setItem(this.CONFIG.SAVE_KEY, JSON.stringify(this.state));
+        } catch (error) {
+            console.error("Error al guardar el estado:", error);
+        }
+    }
+
+    #loadState = () => {
+        try {
+            const savedState = localStorage.getItem(this.CONFIG.SAVE_KEY);
+            if (savedState) {
+                const loaded = JSON.parse(savedState);
+                // Fusiona el estado guardado con el por defecto para evitar errores
+                // si se añaden nuevas propiedades en futuras actualizaciones.
+                this.state = { ...this.defaultState, ...loaded };
             }
-        });
+        } catch (error) {
+            console.error("Error al cargar el estado, se usará el estado por defecto:", error);
+            this.state = {...this.defaultState};
+        }
     }
-    
-    // --- MANEJO DE EVENTOS ACTUALIZADO ---
-    setupEventListeners() {
-        this.dom.globe.addEventListener('click', () => this.handleTap());
-        
-        this.dom.projectsList.addEventListener('click', (event) => {
-            const button = event.target.closest('.buy-button');
-            if (button) this.buyProject(button.dataset.projectId);
-        });
 
-        // Event listener para el nuevo botón
-        this.dom.boosterButton.addEventListener('click', () => this.activateBooster());
+    #formatNumber = (num) => {
+        const number = Math.floor(num);
+        if (number < 1e3) return number.toString();
+        if (number < 1e6) return `${(number / 1e3).toFixed(2)}K`;
+        if (number < 1e9) return `${(number / 1e6).toFixed(2)}M`;
+        if (number < 1e12) return `${(number / 1e9).toFixed(2)}B`;
+        return `${(number / 1e12).toFixed(2)}T`;
     }
 }
 
-
-// --- PUNTO DE ENTRADA (SIN CAMBIOS) ---
-document.addEventListener('DOMContentLoaded', async () => {
+// Inicia el juego cuando el DOM esté listo.
+window.addEventListener('DOMContentLoaded', async () => {
     const game = new ProjectTerraNova();
     await game.init();
 });
