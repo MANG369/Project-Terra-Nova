@@ -1,0 +1,255 @@
+// game.js
+
+/**
+ * Clase principal que encapsula toda la lógica y estado del juego.
+ * Sigue los principios de diseño de software moderno para una aplicación web robusta.
+ */
+class ProjectTerraNova {
+    // Configuración y estado inicial del juego.
+    constructor() {
+        this.GAME_VERSION = "1.0.0"; // Versión para la persistencia de datos.
+        this.TICK_RATE = 1000; // El bucle principal se ejecuta cada 1000ms (1 segundo).
+
+        // Definición de los proyectos globales.
+        this.projectBlueprints = {
+            'edu': { name: "Educación Universal", baseCost: 10, baseIncome: 0.1, costMultiplier: 1.15 },
+            'energy': { name: "Energía Limpia Global", baseCost: 150, baseIncome: 1, costMultiplier: 1.20 },
+            'health': { name: "Salud y Bienestar", baseCost: 1000, baseIncome: 5, costMultiplier: 1.25 },
+            'water': { name: "Acceso a Agua Potable", baseCost: 5000, baseIncome: 20, costMultiplier: 1.30 }
+        };
+
+        // Estado del juego.
+        this.state = {
+            pazCoin: 0,
+            projects: {
+                'edu': { level: 0 },
+                'energy': { level: 0 },
+                'health': { level: 0 },
+                'water': { level: 0 }
+            },
+            lastUpdate: Date.now()
+        };
+
+        // Referencias a los elementos del DOM para un renderizado performante.
+        this.dom = {
+            balance: document.getElementById('pazcoin-balance'),
+            perSecond: document.getElementById('pazcoin-per-second'),
+            projectsList: document.getElementById('projects-list'),
+            globe: document.getElementById('globe'),
+            clickFeedback: document.getElementById('click-feedback'),
+            walletStatus: document.getElementById('wallet-status'),
+        };
+
+        // Conector de la billetera TON.
+        this.tonConnectUI = null;
+    }
+
+    /**
+     * Inicializa el juego.
+     * Carga el estado guardado, configura la billetera y arranca el bucle principal.
+     * Utiliza async/await para garantizar una carga robusta.
+     */
+    async init() {
+        console.log("Iniciando Project Terra Nova...");
+        this.loadState();
+        await this.setupTonConnect();
+        this.setupEventListeners();
+        
+        // Iniciar el bucle principal del juego.
+        setInterval(() => this.gameLoop(), this.TICK_RATE);
+        
+        console.log("Juego iniciado y listo.");
+    }
+
+    // --- LÓGICA CENTRAL DEL JUEGO ---
+
+    /**
+     * El bucle principal del juego, se ejecuta a la velocidad de TICK_RATE.
+     * Calcula las ganancias offline y pasivas, actualiza el estado y renderiza la UI.
+     */
+    gameLoop() {
+        const now = Date.now();
+        const elapsedSeconds = (now - this.state.lastUpdate) / 1000;
+        
+        const passiveIncome = this.calculatePassiveIncome();
+        this.state.pazCoin += passiveIncome * elapsedSeconds;
+        this.state.lastUpdate = now;
+
+        this.render();
+        this.saveState(); // Guardar progreso periódicamente.
+    }
+    
+    /**
+     * Gestiona un clic (o tap) en el globo.
+     */
+    handleTap() {
+        this.state.pazCoin += 1;
+        this.showClickFeedback();
+        this.renderBalance(); // Actualización instantánea para mejor feedback.
+    }
+
+    /**
+     * Compra o mejora un proyecto global.
+     * @param {string} projectId - El ID del proyecto a comprar.
+     */
+    buyProject(projectId) {
+        const project = this.projectBlueprints[projectId];
+        const currentLevel = this.state.projects[projectId].level;
+        const cost = this.calculateProjectCost(projectId);
+
+        if (this.state.pazCoin >= cost) {
+            this.state.pazCoin -= cost;
+            this.state.projects[projectId].level++;
+            this.render(); // Re-renderizar todo para actualizar costos y niveles.
+        }
+    }
+    
+    // --- CÁLCULOS Y UTILIDADES ---
+
+    calculatePassiveIncome() {
+        let totalIncome = 0;
+        for (const id in this.state.projects) {
+            const level = this.state.projects[id].level;
+            if (level > 0) {
+                totalIncome += level * this.projectBlueprints[id].baseIncome;
+            }
+        }
+        return totalIncome;
+    }
+
+    calculateProjectCost(projectId) {
+        const project = this.projectBlueprints[projectId];
+        const level = this.state.projects[projectId].level;
+        // Fórmula de coste exponencial.
+        return Math.floor(project.baseCost * Math.pow(project.costMultiplier, level));
+    }
+
+    // --- RENDERIZADO DECLARATIVO ---
+
+    /**
+     * Actualiza la interfaz de usuario para que refleje el estado actual del juego.
+     * Solo modifica las partes del DOM que necesitan cambiar.
+     */
+    render() {
+        this.renderBalance();
+        this.renderProjects();
+    }
+    
+    renderBalance() {
+        this.dom.balance.textContent = Math.floor(this.state.pazCoin).toLocaleString();
+        this.dom.perSecond.textContent = this.calculatePassiveIncome().toFixed(2);
+    }
+    
+    renderProjects() {
+        this.dom.projectsList.innerHTML = ''; // Limpiar la lista actual.
+        for (const id in this.projectBlueprints) {
+            const blueprint = this.projectBlueprints[id];
+            const state = this.state.projects[id];
+            const cost = this.calculateProjectCost(id);
+
+            const projectElement = document.createElement('div');
+            projectElement.className = 'project';
+            projectElement.innerHTML = `
+                <div class="project-info">
+                    <h3>${blueprint.name} (Nivel ${state.level})</h3>
+                    <p>+${(state.level * blueprint.baseIncome).toFixed(2)} $XPAZ/s</p>
+                    <p>Próxima mejora: ${cost.toLocaleString()} $XPAZ</p>
+                </div>
+                <button class="buy-button" data-project-id="${id}">Mejorar</button>
+            `;
+            
+            const buyButton = projectElement.querySelector('.buy-button');
+            buyButton.disabled = this.state.pazCoin < cost;
+            
+            this.dom.projectsList.appendChild(projectElement);
+        }
+    }
+    
+    showClickFeedback() {
+        const feedback = this.dom.clickFeedback;
+        feedback.classList.add('show');
+        // Resetear la animación después de que termine.
+        setTimeout(() => feedback.classList.remove('show'), 500);
+    }
+
+    // --- PERSISTENCIA DE DATOS ---
+
+    /**
+     * Guarda el estado del juego en localStorage.
+     */
+    saveState() {
+        const dataToSave = {
+            version: this.GAME_VERSION,
+            state: this.state
+        };
+        localStorage.setItem('terraNovaSave', JSON.stringify(dataToSave));
+    }
+
+    /**
+     * Carga el estado del juego desde localStorage.
+     * Valida la versión para evitar corrupción de datos.
+     */
+    loadState() {
+        const savedData = localStorage.getItem('terraNovaSave');
+        if (savedData) {
+            try {
+                const parsedData = JSON.parse(savedData);
+                // Si la versión guardada es la misma, cargamos el progreso.
+                if (parsedData.version === this.GAME_VERSION) {
+                    this.state = parsedData.state;
+                } else {
+                    console.warn("Versión de guardado obsoleta. Se iniciará un nuevo juego.");
+                }
+            } catch (error) {
+                console.error("Error al cargar datos guardados. Empezando de nuevo.", error);
+            }
+        }
+    }
+    
+    // --- INTEGRACIÓN BLOCKCHAIN (TON) ---
+
+    /**
+     * Configura TON Connect para la interacción opcional con la billetera.
+     */
+    async setupTonConnect() {
+        this.tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://URL_DE_TU_JUEGO/tonconnect-manifest.json', // ¡IMPORTANTE: Debes crear y alojar este archivo!
+            buttonRootId: 'wallet-status'
+        });
+
+        // (Opcional) Escuchar cambios en la billetera para obtener la identidad del jugador.
+        this.tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                const address = wallet.account.address;
+                console.log(`Billetera conectada: ${address}`);
+                // Aquí podrías guardar o usar el 'address' como una identidad única.
+            }
+        });
+    }
+    
+    // --- MANEJO DE EVENTOS ---
+    
+    /**
+     * Configura todos los event listeners de la aplicación.
+     */
+    setupEventListeners() {
+        this.dom.globe.addEventListener('click', () => this.handleTap());
+        
+        // Usar delegación de eventos para los botones de proyectos.
+        this.dom.projectsList.addEventListener('click', (event) => {
+            if (event.target && event.target.classList.contains('buy-button')) {
+                const projectId = event.target.dataset.projectId;
+                this.buyProject(projectId);
+            }
+        });
+    }
+}
+
+
+// --- PUNTO DE ENTRADA DE LA APLICACIÓN ---
+
+// Esperar a que el DOM esté completamente cargado para iniciar el juego.
+document.addEventListener('DOMContentLoaded', async () => {
+    const game = new ProjectTerraNova();
+    await game.init();
+});

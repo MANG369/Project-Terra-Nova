@@ -1,0 +1,141 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --background-color: #ecf0f1;
+    --font-color: #34495e;
+    --container-bg: #ffffff;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--font-color);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--container-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--background-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+#clicker-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#globe-container {
+    position: relative;
+    display: inline-block;
+}
+
+#globe {
+    font-size: 120px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s ease;
+}
+
+#globe:active {
+    transform: scale(0.95);
+}
+
+#click-feedback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: var(--secondary-color);
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+#click-feedback.show {
+    opacity: 1;
+    transform: translate(-50%, -150%);
+}
+
+#stats-section h2 {
+    font-size: 2.5em;
+    color: var(--secondary-color);
+    margin: 10px 0;
+}
+
+#stats-section p {
+    font-size: 1.2em;
+    opacity: 0.8;
+}
+
+.project {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.2s;
+}
+
+.project:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.project-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--primary-color);
+}
+
+.project-info p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.buy-button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    font-size: 1em;
+}
+
+.buy-button:hover {
+    background-color: #2980b9;
+}
+
+.buy-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}

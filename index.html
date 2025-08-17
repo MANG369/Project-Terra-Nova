@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Terra Nova</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Project Terra Nova</h1>
+            <div id="wallet-status">
+                </div>
+        </header>
+
+        <main>
+            <div id="clicker-section">
+                <div id="globe-container">
+                    <div id="globe">🌍</div>
+                    <div id="click-feedback">+1</div>
+                </div>
+                <div id="stats-section">
+                    <h2><span id="pazcoin-balance">0</span> $XPAZ</h2>
+                    <p><span id="pazcoin-per-second">0.00</span> $XPAZ por segundo</p>
+                </div>
+            </div>
+
+            <div id="projects-section">
+                <h2>Proyectos Globales</h2>
+                <div id="projects-list">
+                    </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Project Terra Nova - Un Juego Incremental de Paz Global</p>
+        </footer>
+    </div>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
